@@ -37,6 +37,13 @@ stages {
             sh 'docker push $IMAGE_NAME:latest'
         }
     }
+    stage('Deploy to Kubernetes') {
+        steps {
+            sh '''
+                kubectl set image deployment/devops-app devops-app=priteshk13/devops-app:latest
+            '''
+        }
+    }
 }
 
 }
