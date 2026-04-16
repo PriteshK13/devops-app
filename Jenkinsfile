@@ -37,10 +37,11 @@ stages {
             sh 'docker push $IMAGE_NAME:latest'
         }
     }
-    stage('Deploy to Kubernetes') {
+   stage('Deploy to Kubernetes') {
         steps {
             sh '''
-                kubectl set image deployment/devops-app devops-app=priteshk13/devops-app:latest
+            export KUBECONFIG=/var/lib/jenkins/.kube/config
+            kubectl set image deployment/devops-app devops-app=priteshk13/devops-app:latest
             '''
         }
     }
