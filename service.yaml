@@ -4,6 +4,7 @@ metadata:
   name: devops-service
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      service.beta.kubernetes.io/aws-load-balancer-subnets: "subnet-0e1e763c8774f4dbf,subnet-0734558c4c1a76732"
 spec:
   selector:
     app: devops-app
