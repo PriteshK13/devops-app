@@ -1,50 +1,41 @@
 pipeline {
-agent any
+    agent any
 
-environment {
-    DOCKERHUB_CREDENTIALS = 'dockerhub-creds'
-    IMAGE_NAME = 'priteshk13/devops-app'
-}
-
-stages {
-
-    stage('Checkout Code') {
-        steps {
-           git branch: 'main', url: 'https://github.com/PriteshK13/devops-app.git'
-        }
+    environment {
+        DOCKER_IMAGE = "priteshk13/devops-app"
+        TAG = "latest"
     }
 
-    stage('Build Docker Image') {
-        steps {
-            sh 'docker build -t $IMAGE_NAME:latest .'
-        }
-    }
+    stages {
 
-    stage('Login to DockerHub') {
-        steps {
-            withCredentials([usernamePassword(
-                credentialsId: 'dockerhub-creds',
-                usernameVariable: 'USERNAME',
-                passwordVariable: 'PASSWORD'
-            )]) {
-                sh 'echo $PASSWORD | docker login -u $USERNAME --password-stdin'
+        stage('Clone Code') {
+            steps {
+                git 'https://github.com/PriteshK13/devops-app.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $DOCKER_IMAGE:$TAG .'
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                    sh 'docker push $DOCKER_IMAGE:$TAG'
+                }
+            }
+        }
+
+        stage('Deploy to EKS') {
+            steps {
+                sh '''
+                aws eks update-kubeconfig --region ap-south-1 --name devops-eks
+                kubectl set image deployment/devops-app devops-app=$DOCKER_IMAGE:$TAG
+                '''
             }
         }
     }
-
-    stage('Push Image') {
-        steps {
-            sh 'docker push $IMAGE_NAME:latest'
-        }
-    }
-   stage('Deploy to Kubernetes') {
-        steps {
-            sh '''
-            export KUBECONFIG=/var/lib/jenkins/.kube/config
-            kubectl set image deployment/devops-app devops-app=priteshk13/devops-app:latest
-            '''
-        }
-    }
-}
-
 }
