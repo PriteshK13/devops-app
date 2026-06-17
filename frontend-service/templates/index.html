@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumina Events — Portfolio & Planning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo">Lumina<span>Events</span></a>
+      <nav>
+        <a href="#portfolio">Portfolio</a>
+        <a href="#estimate">Get Estimate</a>
+        <button type="button" class="btn btn-outline" id="open-chat">AI Assistant</button>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container hero-content">
+      <p class="eyebrow">Premium Event Management</p>
+      <h1>Craft moments that last a lifetime</h1>
+      <p class="hero-sub">Weddings, corporate galas, and milestone celebrations — planned with precision and delivered with elegance.</p>
+      <a href="#estimate" class="btn btn-primary">Request a Custom Estimate</a>
+    </div>
+  </section>
+
+  <section id="portfolio" class="portfolio section">
+    <div class="container">
+      <h2 class="section-title">Our Portfolio</h2>
+      <p class="section-sub">Explore curated experiences across our signature event categories.</p>
+      <div class="portfolio-grid">
+        {% for item in portfolio %}
+        <article class="portfolio-card" style="--card-gradient: {{ item.image_gradient }}">
+          <div class="card-icon">{{ item.icon }}</div>
+          <span class="card-category">{{ item.category }}</span>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.description }}</p>
+          <ul>
+            {% for highlight in item.highlights %}
+            <li>{{ highlight }}</li>
+            {% endfor %}
+          </ul>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section id="estimate" class="estimate section">
+    <div class="container estimate-layout">
+      <div class="estimate-intro">
+        <h2 class="section-title">Plan Your Event</h2>
+        <p class="section-sub">Tell us about your vision and receive an instant planning package with cost breakdown and timeline.</p>
+      </div>
+      <form id="estimate-form" class="estimate-form">
+        <div class="form-row">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" required placeholder="Jane Doe">
+        </div>
+        <div class="form-row">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required placeholder="jane@example.com">
+        </div>
+        <div class="form-row">
+          <label for="event_type">Event Type</label>
+          <select id="event_type" name="event_type" required>
+            <option value="">Select event type</option>
+            <option value="wedding">Wedding</option>
+            <option value="corporate">Corporate Event</option>
+            <option value="birthday">Birthday</option>
+            <option value="anniversary">Anniversary</option>
+            <option value="conference">Conference</option>
+          </select>
+        </div>
+        <div class="form-row two-col">
+          <div>
+            <label for="budget">Budget</label>
+            <input type="number" id="budget" name="budget" required min="100" step="100" placeholder="15000">
+          </div>
+          <div>
+            <label for="budget_currency">Currency</label>
+            <select id="budget_currency" name="budget_currency">
+              <option value="USD">USD ($)</option>
+              <option value="INR">INR (₹)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="location">Location</label>
+          <input type="text" id="location" name="location" required placeholder="Mumbai, India">
+        </div>
+        <div class="form-row">
+          <label for="special_requirements">Special Requirements</label>
+          <textarea id="special_requirements" name="special_requirements" rows="3" placeholder="Dietary needs, theme ideas, accessibility requirements..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="submit-estimate">
+          <span class="btn-text">Generate Estimate</span>
+          <span class="btn-spinner hidden"></span>
+        </button>
+      </form>
+
+      <div id="estimate-result" class="estimate-result hidden">
+        <div class="result-header">
+          <h3>Your Planning Package</h3>
+          <span id="result-tier" class="tier-badge"></span>
+        </div>
+        <div id="result-breakdown" class="breakdown-grid"></div>
+        <p class="total-line">Total Estimated Cost: <strong id="result-total"></strong></p>
+        <div id="result-timeline" class="timeline"></div>
+        <pre id="result-plan" class="plan-text"></pre>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 Lumina Events. Crafted with care.</p>
+    </div>
+  </footer>
+
+  <!-- AI Chatbot Panel -->
+  <aside id="chat-panel" class="chat-panel" aria-hidden="true">
+    <div class="chat-header">
+      <div>
+        <h3>AI Event Assistant</h3>
+        <p>Ask about venues, budgets, policies & more</p>
+      </div>
+      <button type="button" id="close-chat" class="chat-close" aria-label="Close chat">&times;</button>
+    </div>
+    <div id="chat-messages" class="chat-messages">
+      <div class="chat-msg bot">
+        Hello! I'm your AI Event Assistant. How can I help plan your celebration today?
+      </div>
+    </div>
+    <div id="chat-suggestions" class="chat-suggestions"></div>
+    <form id="chat-form" class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Ask about venues, catering..." autocomplete="off" required>
+      <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+  </aside>
+  <div id="chat-overlay" class="chat-overlay hidden"></div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: event-postgres
+    environment:
+      POSTGRES_USER: eventuser
+      POSTGRES_PASSWORD: eventpass
+      POSTGRES_DB: eventdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eventuser -d eventdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  estimation-service:
+    build:
+      context: .
+      dockerfile: estimation-service/Dockerfile
+    container_name: event-estimation
+    environment:
+      DATABASE_URL: postgresql://eventuser:eventpass@postgres:5432/eventdb
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  chatbot-service:
+    build:
+      context: .
+      dockerfile: chatbot-service/Dockerfile
+    container_name: event-chatbot
+    ports:
+      - "8002:8002"
+
+  frontend-service:
+    build:
+      context: .
+      dockerfile: frontend-service/Dockerfile
+    container_name: event-frontend
+    environment:
+      ESTIMATION_SERVICE_URL: http://estimation-service:8001
+      CHATBOT_SERVICE_URL: http://chatbot-service:8002
+    ports:
+      - "5000:5000"
+    depends_on:
+      - estimation-service
+      - chatbot-service
+
+volumes:
+  postgres_data:
